@@ -6,14 +6,13 @@
       </ElTabPane>
       <ElTabPane label="Auto" name="auto">
         $$$
-        <!-- <Auto /> -->
       </ElTabPane>
       </ElTabs>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ElButton, ElTabs, ElTabPane } from 'element-plus'
+import { ElTabs, ElTabPane } from 'element-plus'
 import Manual from './tabs/Manual.vue'
 
 const activeTab = ref('manual')
