@@ -1,11 +1,9 @@
 <template>
   <div
     class="w-full h-full"
-    :class="isConfig ? 'py-10 px-0' : ''"
   >
     <Row
-      :qr="qr"
-      :isConfig="isConfig"
+      :qr="currentQr"
     />
   </div>
   <div class="w-full mt-5 px-5">
@@ -15,15 +13,15 @@
       type="success"
       @click="isConfig = !isConfig"
     >
-      Config
+      {{ isConfig ? 'Save' : 'Config' }}
     </ElButton>
   </div>
   <div class="mt-5 px-5 flex justify-between">
     <ElButton
-      @click="handleDrawQr"
+      @click="() => {}"
+      disabled
       class="w-30"
       type="success"
-      :disabled="isConfig"
     >
       Draw QR
     </ElButton>
@@ -32,65 +30,86 @@
       class="w-30"
       type="danger"
       plain
+      :disabled="isConfig"
     >
       New QR
     </ElButton>
   </div>
+
+  <ElDialog
+    v-model="isConfig"
+    title="QR Code"
+    width="100%"
+  >
+    <div class="w-full h-full">
+      <RowDialog
+        :qr="currentQr"
+        :isConfig="isConfig"
+      />
+    </div>
+  </ElDialog>
 </template>
 
 <script setup lang="ts">
-// import jsQR from 'jsqr'
-import jsQR from 'jsqr-es6'
+//lib
+// import jsQR from 'jsqr-es6'
+import { ElButton, ElDialog } from 'element-plus'
+// import html2canvas from 'html2canvas'
+//vue
 import { onMounted, provide, ref } from 'vue'
-import { base_qr } from '../utils/baseQr.ts'
 import Row from './Row.vue'
-import { ElButton } from 'element-plus'
-import html2canvas from 'html2canvas'
+import RowDialog from './RowDialog.vue'
+//utils
+import QrCode, { QrCodeType } from '../utils/QrCode.ts'
+
+const localQr = () => {
+  const qr = localStorage.getItem('qr')
+  if (qr) {
+    return JSON.parse(qr)
+  }
+  return null
+}
 
 const isConfig = ref<boolean>(false)
 
+const currentQr = ref<QrCodeType>(localQr())
+
 const handleNewQr = () => {
-  localStorage.removeItem('qr')
-  qr.value = base_qr
+  const newQr = new QrCode().getQrCode()
+  localStorage.setItem('qr', JSON.stringify(newQr))
+  currentQr.value = newQr
 }
-const baseQr = base_qr
 
-const localQr = ref<string>(localStorage.getItem('qr') || '')
-
-const qr = ref<{ col: number; row: number; isBlack: boolean, disabled: boolean }[][]>(baseQr)
-
-const handleClick = (row: number, col: number) => {
-  console.log({ row, col })
+const handleClick = (x: number, y: number) => {
   if (!isConfig.value) return
-  if (qr.value[row][col].disabled) return
-  qr.value[row][col].isBlack = !qr.value[row][col].isBlack
+  if (currentQr.value[x][y].isDisabled) return
+  currentQr.value[x][y].isBlackDot = !currentQr.value[x][y].isBlackDot
 
-  localStorage.setItem('qr', JSON.stringify(qr.value))
+  localStorage.setItem('qr', JSON.stringify(currentQr.value))
 }
 
-const handleDrawQr = () => {
-  const qrWrapper = document.getElementById('qr-wrapper')
-  if (!qrWrapper) return
-  html2canvas(qrWrapper).then((canvas) => {
-    const link = document.createElement('a')
-    link.download = 'qr.png'
-    link.href = canvas.toDataURL('image/png')
-    link.click()
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+// const handleDrawQr = () => {
+//   const qrWrapper = document.getElementById('qr-wrapper')
+//   if (!qrWrapper) return
+//   html2canvas(qrWrapper).then((canvas) => {
+//     const link = document.createElement('a')
+//     link.download = 'qr.png'
+//     link.href = canvas.toDataURL('image/png')
+//     link.click()
+//     const ctx = canvas.getContext('2d')
+//     if (!ctx) return
 
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const code = jsQR(imageData.data, imageData.width, imageData.height)
-    console.log('code', code)
-  })
-}
+//     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+//     const code = jsQR(imageData.data, imageData.width, imageData.height)
+//     console.log('code', code)
+//   })
+// }
 
 onMounted(() => {
-  console.log('localQr.value', localQr.value)
-  if (localQr.value) {
-    qr.value = JSON.parse(localQr.value)
+  if (localQr()) {
+    currentQr.value = localQr()
   } else {
-    qr.value = base_qr
+    handleNewQr()
   }
 })
 provide('handleClick', handleClick)

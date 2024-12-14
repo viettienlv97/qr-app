@@ -4,7 +4,7 @@
       <ElTabPane label="Manual" name="manual">
         <Manual />
       </ElTabPane>
-      <ElTabPane label="Auto" name="auto">
+      <ElTabPane label="Auto" name="auto" disabled>
         $$$
       </ElTabPane>
       </ElTabs>

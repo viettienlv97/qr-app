@@ -16,7 +16,7 @@ import { QrCodeType } from '../utils/QrCode.ts';
 
 const props = defineProps<{
   qr: QrCodeType
-  isConfig?: boolean
+  isConfig: boolean
 }>()
 
 const configClass = computed(() => {

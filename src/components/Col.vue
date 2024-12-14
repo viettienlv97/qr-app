@@ -6,9 +6,9 @@
     <QrBox
       v-for="(box, index) in col"
       :key="index"
-      :colNum="box.col"
-      :rowNum="box.row"
-      :isBlack="box.isBlack"
+      :colNum="box.y"
+      :rowNum="box.x"
+      :isBlack="box.isBlackDot"
     />
   </div>
 </template>
@@ -16,10 +16,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import QrBox from './QrBox.vue'
+import { QrDotType } from '../utils/QrCode.ts';
 
 const props = defineProps<{
-  col: { col: number; row: number; isBlack: boolean }[]
-  isConfig: boolean
+  col: QrDotType[]
+  isConfig?: boolean
 }>()
 
 const configClass = computed(() => {
