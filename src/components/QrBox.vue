@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, defineProps } from 'vue'
+import { inject } from 'vue'
 
 type HandleClick = (row: number, col: number) => void
 type Props = {
